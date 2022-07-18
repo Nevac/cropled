@@ -1,3 +1,4 @@
+import {CSSTransition, SwitchTransition, TransitionGroup} from 'react-transition-group';
 import "./PlantCarousel.css"
 import {Grid} from "@mui/material";
 import room from "../../media/images/room.jpg";
@@ -7,23 +8,21 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import square from "../../media/images/square.png";
 import triangle from "../../media/images/triangle.png";
 import circle from "../../media/images/circle.png";
+import React from "react";
 
+const duration = 300;
 
 export default function PlantCarousel() {
 
+    const [slideRight, setSlideRight] = useState(true);
     const [index, setIndex] = useState(0);
-    const [moveInForward, setMoveInForward] = useState(false);
-    const [moveOutForward, setMoveOutForward] = useState(false);
-
-    let slideForward = () => {
-        setMoveOutForward(true);
-    }
 
     let forward = () => {
         let newIndex = index + 1;
         if(newIndex >= elements.length) {
             newIndex = 0;
         }
+        setSlideRight(true);
         setIndex(newIndex);
     }
 
@@ -32,29 +31,14 @@ export default function PlantCarousel() {
         if(newIndex < 0) {
             newIndex = elements.length - 1;
         }
+        setSlideRight(false);
         setIndex(newIndex);
-    }
-
-    let onAnimationEnd = () => {
-        if(moveOutForward) {
-            forward();
-            setMoveOutForward(false);
-            setMoveInForward(true);
-        }
-        else if(moveInForward) {
-            setMoveInForward(false);
-        }
-    }
-
-    let getClassName = () => {
-        if(moveOutForward) return "slide-out-forward";
-        return "slide-in-forward";
     }
 
     return (
         <div>
-            <div style={{position: "relative",  textAlign: "center"}}>
-                <img style={{width: "100%"}} src={room} alt={"room"}/>
+            <div style={{position: "relative",  textAlign: "center", overflow: "hidden"}}>
+                <img style={{width: "100%", zIndex: "-10"}} src={room} alt={"room"}/>
                 <div style={{ position: "absolute", top: "30%", width: "100%"}}>
                     <Grid container
                           align="center"
@@ -64,13 +48,25 @@ export default function PlantCarousel() {
                             <ArrowBackIosIcon onClick={backward} className={"icon"}/>
                         </Grid>
                         <Grid item xs={8}>
-                            <div className={getClassName()} onAnimationEnd={onAnimationEnd}>
-                                <p className={"plant-text"}>{elements[index].text}</p>
-                                <img src={elements[index].image} className={"plant-image"}/>
+                            <div style={{display: "flex", position: "relative", justifyContent: "center"}}>
+                                <TransitionGroup component={null}
+                                    childFactory={child => React.cloneElement(child, { classNames: `slide-${slideRight ? 'right' : 'left'}` })}>
+                                    <CSSTransition key={index}
+                                                   addEndListener={(node, done) => {
+                                                       node.addEventListener("transitionend", done, false);
+                                                   }}
+                                    >
+                                        <div style={{position: "absolute"}}>
+                                            <p className={"plant-text"}>{elements[index].text}</p>
+                                            <img src={elements[index].image} className={"plant-image"}/>
+                                        </div>
+                                    </CSSTransition>
+                                </TransitionGroup>
                             </div>
                         </Grid>
                         <Grid item xs={2}>
-                            <ArrowForwardIosIcon onClick={slideForward} className={"icon"}/>
+                            {        console.log(index)}
+                            <ArrowForwardIosIcon onClick={forward} className={"icon"}/>
                         </Grid>
                     </Grid>
                 </div>
@@ -91,5 +87,5 @@ const elements = [
     {
         image: circle,
         text: "Annual Circla",
-    }
+    },
 ]
