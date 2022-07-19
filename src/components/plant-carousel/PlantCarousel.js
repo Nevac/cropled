@@ -2,22 +2,23 @@ import {CSSTransition, SwitchTransition, TransitionGroup} from 'react-transition
 import "./PlantCarousel.css"
 import {Grid} from "@mui/material";
 import room from "../../media/images/room.jpg";
-import {useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import square from "../../media/images/square.png";
 import triangle from "../../media/images/triangle.png";
 import circle from "../../media/images/circle.png";
 import React from "react";
-
-const duration = 300;
+import useInterval from "../util/useInterval";
 
 export default function PlantCarousel() {
 
     const [slideRight, setSlideRight] = useState(true);
     const [index, setIndex] = useState(0);
+    const timerMS = 5000;
 
     let forward = () => {
+        reset();
         let newIndex = index + 1;
         if(newIndex >= elements.length) {
             newIndex = 0;
@@ -27,6 +28,7 @@ export default function PlantCarousel() {
     }
 
     let backward = () => {
+        reset();
         let newIndex = index - 1;
         if(newIndex < 0) {
             newIndex = elements.length - 1;
@@ -35,41 +37,40 @@ export default function PlantCarousel() {
         setIndex(newIndex);
     }
 
+    const [reset] = useInterval(forward, timerMS);
+
     return (
-        <div>
-            <div style={{position: "relative",  textAlign: "center", overflow: "hidden"}}>
-                <img style={{width: "100%", zIndex: "-10"}} src={room} alt={"room"}/>
-                <div style={{ position: "absolute", top: "30%", width: "100%"}}>
-                    <Grid container
-                          align="center"
-                          justify="center"
-                          spacing={2}>
-                        <Grid item xs={2}>
-                            <ArrowBackIosIcon onClick={backward} className={"icon"}/>
-                        </Grid>
-                        <Grid item xs={8}>
-                            <div style={{display: "flex", position: "relative", justifyContent: "center"}}>
-                                <TransitionGroup component={null}
-                                    childFactory={child => React.cloneElement(child, { classNames: `slide-${slideRight ? 'right' : 'left'}` })}>
-                                    <CSSTransition key={index}
-                                                   addEndListener={(node, done) => {
-                                                       node.addEventListener("transitionend", done, false);
-                                                   }}
-                                    >
-                                        <div style={{position: "absolute"}}>
-                                            <p className={"plant-text"}>{elements[index].text}</p>
-                                            <img src={elements[index].image} className={"plant-image"}/>
-                                        </div>
-                                    </CSSTransition>
-                                </TransitionGroup>
-                            </div>
-                        </Grid>
-                        <Grid item xs={2}>
-                            {        console.log(index)}
-                            <ArrowForwardIosIcon onClick={forward} className={"icon"}/>
-                        </Grid>
+        <div className={"main"}>
+            <img className={"background"} src={room} alt={"room"}/>
+            <div className={"panel"}>
+                <Grid container
+                      align="center"
+                      justify="center"
+                      spacing={2}>
+                    <Grid item xs={2}>
+                        <ArrowBackIosIcon onClick={backward} className={"icon"}/>
                     </Grid>
-                </div>
+                    <Grid item xs={8}>
+                        <div className={"element-container"}>
+                            <TransitionGroup component={null}
+                                childFactory={child => React.cloneElement(child, { classNames: `slide-${slideRight ? 'right' : 'left'}` })}>
+                                <CSSTransition key={index}
+                                               addEndListener={(node, done) => {
+                                                   node.addEventListener("transitionend", done, false);
+                                               }}
+                                >
+                                    <div className={"element"}>
+                                        <p className={"plant-text"}>{elements[index].text}</p>
+                                        <img src={elements[index].image} className={"plant-image"}/>
+                                    </div>
+                                </CSSTransition>
+                            </TransitionGroup>
+                        </div>
+                    </Grid>
+                    <Grid item xs={2}>
+                        <ArrowForwardIosIcon onClick={forward} className={"icon"}/>
+                    </Grid>
+                </Grid>
             </div>
         </div>
     )

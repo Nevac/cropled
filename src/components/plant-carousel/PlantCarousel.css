@@ -1,3 +1,30 @@
+.main {
+    position: relative;
+    text-align: center;
+    overflow: hidden;
+}
+
+.background {
+    width: 100%;
+    z-index: -10;
+}
+
+.panel {
+    position: absolute;
+    top: 30%;
+    width: 100%
+}
+
+.element-container {
+    display: flex;
+    position: relative;
+    justify-content: center;
+}
+
+.element {
+    position: absolute;
+}
+
 @media only screen and (min-width: 0px) {
     .plant-text {
         font-size: 3vw;
